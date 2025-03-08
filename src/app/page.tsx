@@ -7,27 +7,23 @@ import * as z from "zod"
 
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 
 import * as React from "react"
 import { Check, ChevronsUpDown } from "lucide-react"
 
 import { cn } from "@/lib/utils"
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import { Eye, EyeOff, Loader2 } from "lucide-react"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Loader2 } from "lucide-react"
+
+// Define languages array
+const languages = [
+  { label: "Português", value: "pt" },
+  { label: "English", value: "en" },
+  { label: "Español", value: "es" },
+]
 
 const formSchema = z
   .object({
@@ -37,6 +33,13 @@ const formSchema = z
     gender: z.string().min(1, "Selecione um gênero"),
     password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
     confirmPassword: z.string(),
+    instituicao: z.string().optional(),
+    cpf: z.string().optional(),
+    matricula: z.string().optional(),
+    unidade: z.string().optional(),
+    Cidade: z.string().optional(),
+    id: z.string().optional(),
+    language: z.string().optional(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Senhas não conferem",
@@ -59,6 +62,13 @@ export default function Home() {
       gender: "",
       password: "",
       confirmPassword: "",
+      instituicao: "",
+      cpf: "",
+      matricula: "",
+      unidade: "",
+      Cidade: "",
+      id: "",
+      language: "",
     },
   })
 
@@ -77,16 +87,20 @@ export default function Home() {
   }
 
   return (
-    <div className="h-full   bg-transparent flex w-full flex-col  ">
+    <div className="h-full bg-transparent flex w-full flex-col">
       <header className="mb-5 bg-gray-100 w-full p-4">
-        <h1 className=" text-blue-900 text-4xl"> <span className="font-bold">Mente</span><span className="font-serif">Segura</span>  </h1>
+        <h1 className="text-blue-900 text-4xl">
+          <span className="font-bold">Mente</span>
+          <span className="font-serif">Segura</span>
+        </h1>
       </header>
 
       <Card className="w-full max-w-4xl mx-auto flex items-center justify-center border-0 shadow-none">
-        <CardHeader className="w-full ">
-        
+        <CardHeader className="w-full">
+          <CardTitle>Criar Conta</CardTitle>
+          <CardDescription>Preencha os dados abaixo para criar sua conta</CardDescription>
         </CardHeader>
-        <CardContent className="w-full ">
+        <CardContent className="w-full">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -163,7 +177,8 @@ export default function Home() {
                   />
                 </div>
 
-         
+                {/* Right Column */}
+                <div className="space-y-4">
                   <FormField
                     control={form.control}
                     name="unidade"
@@ -220,70 +235,63 @@ export default function Home() {
                     )}
                   />
 
-                <FormItem className="flex flex-col">
-              <FormLabel>Language</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      className={cn(
-                        "w-[200px] justify-between",
-                        !field.value && "text-muted-foreground"
-                      )}
-                    >
-                      {field.value
-                        ? languages.find(
-                            (language) => language.value === field.value
-                          )?.label
-                        : "Select language"}
-                      <ChevronsUpDown className="opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-[200px] p-0">
-                  <Command>
-                    <CommandInput
-                      placeholder="Search framework..."
-                      className="h-9"
-                    />
-                    <CommandList>
-                      <CommandEmpty>No framework found.</CommandEmpty>
-                      <CommandGroup>
-                        {languages.map((language) => (
-                          <CommandItem
-                            value={language.label}
-                            key={language.value}
-                            onSelect={() => {
-                              form.setValue("language", language.value)
-                            }}
-                          >
-                            {language.label}
-                            <Check
-                              className={cn(
-                                "ml-auto",
-                                language.value === field.value
-                                  ? "opacity-100"
-                                  : "opacity-0"
-                              )}
-                            />
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-              <FormDescription>
-                This is the language that will be used in the dashboard.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                  <FormField
+                    control={form.control}
+                    name="language"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel>Idioma</FormLabel>
+                        <Popover open={open} onOpenChange={setOpen}>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                className={cn("w-full justify-between", !field.value && "text-muted-foreground")}
+                              >
+                                {field.value
+                                  ? languages.find((language) => language.value === field.value)?.label
+                                  : "Selecione o idioma"}
+                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-full p-0">
+                            <Command>
+                              <CommandInput />
+                              <CommandList>
+                                <CommandEmpty>Nenhum idioma encontrado.</CommandEmpty>
+                                <CommandGroup>
+                                  {languages.map((language) => (
+                                    <CommandItem
+                                      key={language.value}
+                                      value={language.label}
+                                      onSelect={() => {
+                                        form.setValue("language", language.value)
+                                        setOpen(false)
+                                      }}
+                                    >
+                                      {language.label}
+                                      <Check
+                                        className={cn(
+                                          "ml-auto",
+                                          language.value === field.value ? "opacity-100" : "opacity-0",
+                                        )}
+                                      />
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                        <FormDescription>Este é o idioma que será usado no painel.</FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
-   
+              </div>
 
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? (
@@ -298,8 +306,8 @@ export default function Home() {
             </form>
           </Form>
         </CardContent>
-        
       </Card>
     </div>
   )
 }
+
