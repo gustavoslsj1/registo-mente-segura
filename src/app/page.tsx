@@ -8,8 +8,25 @@ import * as z from "zod"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 
+import * as React from "react"
+import { Check, ChevronsUpDown } from "lucide-react"
+
+import { cn } from "@/lib/utils"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
 
 const formSchema = z
@@ -30,6 +47,8 @@ export default function Home() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [open, setOpen] = React.useState(false)
+  const [value, setValue] = React.useState("")
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -144,8 +163,7 @@ export default function Home() {
                   />
                 </div>
 
-                {/* Right Column */}
-                <div className="space-y-4">
+         
                   <FormField
                     control={form.control}
                     name="unidade"
@@ -202,9 +220,70 @@ export default function Home() {
                     )}
                   />
 
-               
+                <FormItem className="flex flex-col">
+              <FormLabel>Language</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      className={cn(
+                        "w-[200px] justify-between",
+                        !field.value && "text-muted-foreground"
+                      )}
+                    >
+                      {field.value
+                        ? languages.find(
+                            (language) => language.value === field.value
+                          )?.label
+                        : "Select language"}
+                      <ChevronsUpDown className="opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-[200px] p-0">
+                  <Command>
+                    <CommandInput
+                      placeholder="Search framework..."
+                      className="h-9"
+                    />
+                    <CommandList>
+                      <CommandEmpty>No framework found.</CommandEmpty>
+                      <CommandGroup>
+                        {languages.map((language) => (
+                          <CommandItem
+                            value={language.label}
+                            key={language.value}
+                            onSelect={() => {
+                              form.setValue("language", language.value)
+                            }}
+                          >
+                            {language.label}
+                            <Check
+                              className={cn(
+                                "ml-auto",
+                                language.value === field.value
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              )}
+                            />
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+              <FormDescription>
+                This is the language that will be used in the dashboard.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
                 </div>
-              </div>
+   
 
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? (
@@ -224,4 +303,3 @@ export default function Home() {
     </div>
   )
 }
-
